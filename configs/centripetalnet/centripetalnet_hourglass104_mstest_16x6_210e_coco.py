@@ -91,7 +91,11 @@ data = dict(
     workers_per_gpu=3,
     train=dict(pipeline=train_pipeline),
     val=dict(pipeline=test_pipeline),
-    test=dict(pipeline=test_pipeline))
+    test=dict(
+        type='CocoDataset',
+        ann_file='data/coco/annotations/instances_val2017.json',
+        img_prefix='data/coco/val2017/',
+        pipeline=test_pipeline))
 # optimizer
 optimizer = dict(type='Adam', lr=0.0005)
 optimizer_config = dict(grad_clip=dict(max_norm=35, norm_type=2))

@@ -81,6 +81,9 @@ def coco_classes():
         'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase',
         'scissors', 'teddy_bear', 'hair_drier', 'toothbrush'
     ]
+    # return [
+    #     'airplane', 'fire_hydrant', 'stop_sign', 'parking_meter', 'bear'
+    # ]
 
 
 def cityscapes_classes():
