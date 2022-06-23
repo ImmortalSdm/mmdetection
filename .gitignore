@@ -122,3 +122,13 @@ work_dirs/
 *.pth
 *.py~
 *.sh~
+
+
+OUTPUT/
+DATASET/
+data/
+checkpoints/
+experiments/
+work_dirs/
+coco.json
+instances_train2017.json
