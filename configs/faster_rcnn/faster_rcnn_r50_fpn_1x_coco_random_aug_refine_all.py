@@ -1,5 +1,8 @@
-_base_ = 'deformable_detr_refine_r50_16x2_50e_coco.py'
-model = dict(bbox_head=dict(as_two_stage=True))
+_base_ = [
+    '../_base_/models/faster_rcnn_r50_fpn.py',
+    '../_base_/datasets/coco_detection.py',
+    '../_base_/schedules/schedule_1x.py', '../_base_/default_runtime.py'
+]
 
 dataset_type = 'CocoDataset'
 classes = ('person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train',
@@ -22,17 +25,17 @@ data = dict(
         type=dataset_type,
         # 将类别名字添加至 `classes` 字段中
         classes=classes,
-        ann_file='/home/dmsheng/demo/try/mmdetection/data/coco_default_all/annotations/instances_train2017.json',
-        img_prefix='/home/dmsheng/demo/try/mmdetection/data/coco_default_all/train2017/'),
+        ann_file='/home/dmsheng/demo/try/mmdetection/data/coco_random_aug_refine_all/annotations/instances_train2017.json',
+        img_prefix='/home/dmsheng/demo/try/mmdetection/data/coco_random_aug_refine_all/train2017/'),
     val=dict(
         type=dataset_type,
         # 将类别名字添加至 `classes` 字段中
         classes=classes,
-        ann_file='/home/dmsheng/demo/try/mmdetection/data/coco_default_all/annotations/instances_val2017.json',
-        img_prefix='/home/dmsheng/demo/try/mmdetection/data/coco_default_all/val2017/'),
+        ann_file='/home/dmsheng/demo/try/mmdetection/data/coco_random_aug_refine_all/annotations/instances_val2017.json',
+        img_prefix='/home/dmsheng/demo/try/mmdetection/data/coco_random_aug_refine_all/val2017/'),
     test=dict(
         type=dataset_type,
         # 将类别名字添加至 `classes` 字段中
         classes=classes,
-        ann_file='/home/dmsheng/demo/try/mmdetection/data/coco_default_all/annotations/instances_val2017.json',
-        img_prefix='/home/dmsheng/demo/try/mmdetection/data/coco_default_all/val2017/'))
+        ann_file='/home/dmsheng/demo/try/mmdetection/data/coco_random_aug_refine_all/annotations/instances_val2017.json',
+        img_prefix='/home/dmsheng/demo/try/mmdetection/data/coco_random_aug_refine_all/val2017/'))

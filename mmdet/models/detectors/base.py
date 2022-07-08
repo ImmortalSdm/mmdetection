@@ -75,6 +75,7 @@ class BaseDetector(BaseModule, metaclass=ABCMeta):
         # NOTE the batched image size information may be useful, e.g.
         # in DETR, this is needed for the construction of masks, which is
         # then used for the transformer_head.
+            
         batch_input_shape = tuple(imgs[0].size()[-2:])
         for img_meta in img_metas:
             img_meta['batch_input_shape'] = batch_input_shape
@@ -164,11 +165,13 @@ class BaseDetector(BaseModule, metaclass=ABCMeta):
         should be double nested (i.e.  List[Tensor], List[List[dict]]), with
         the outer list indicating test time augmentations.
         """
+        # print(kwargs)
         if torch.onnx.is_in_onnx_export():
             assert len(img_metas) == 1
             return self.onnx_export(img[0], img_metas[0])
 
         if return_loss:
+            # import pdb; pdb.set_trace()
             return self.forward_train(img, img_metas, **kwargs)
         else:
             return self.forward_test(img, img_metas, **kwargs)
@@ -245,6 +248,7 @@ class BaseDetector(BaseModule, metaclass=ABCMeta):
                   DDP, it means the batch size on each GPU), which is used for
                   averaging the logs.
         """
+        # print(data)  # Sdm
         losses = self(**data)
         loss, log_vars = self._parse_losses(losses)
 

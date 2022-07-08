@@ -15,7 +15,7 @@ except ImportError:
 
 
 @PIPELINES.register_module()
-class LoadImageFromFile:
+class MYLoadImageFromFile:
     """Load an image from file.
 
     Required keys are "img_prefix" and "img_info" (a dict that must contain the
@@ -88,7 +88,7 @@ class LoadImageFromFile:
 
 
 @PIPELINES.register_module()
-class LoadImageFromWebcam(LoadImageFromFile):
+class MYLoadImageFromWebcam(MYLoadImageFromFile):
     """Load an image from webcam.
 
     Similar with :obj:`LoadImageFromFile`, but the image read from webcam is in
@@ -120,7 +120,7 @@ class LoadImageFromWebcam(LoadImageFromFile):
 
 
 @PIPELINES.register_module()
-class LoadMultiChannelImageFromFiles:
+class MYLoadMultiChannelImageFromFiles:
     """Load multi-channel images from a list of separate channel files.
 
     Required keys are "img_prefix" and "img_info" (a dict that must contain the
@@ -203,7 +203,7 @@ class LoadMultiChannelImageFromFiles:
 
 
 @PIPELINES.register_module()
-class LoadAnnotations:
+class MYLoadAnnotations:
     """Load multiple types of annotations.
 
     Args:
@@ -230,7 +230,7 @@ class LoadAnnotations:
                  with_label=True,
                  with_mask=False,
                  with_seg=False,
-                #  with_aug=False, # Sdm
+                 with_aug=False, # Sdm
                  poly2mask=True,
                  denorm_bbox=False,
                  file_client_args=dict(backend='disk')):
@@ -238,7 +238,7 @@ class LoadAnnotations:
         self.with_label = with_label
         self.with_mask = with_mask
         self.with_seg = with_seg
-        # self.with_aug = with_aug
+        self.with_aug = with_aug
         self.poly2mask = poly2mask
         self.denorm_bbox = denorm_bbox
         self.file_client_args = file_client_args.copy()
@@ -416,8 +416,8 @@ class LoadAnnotations:
             results = self._load_masks(results)
         if self.with_seg:
             results = self._load_semantic_seg(results)
-        # if self.with_aug:  # Sdm
-        #     results = self._load_augs(results)
+        if self.with_aug:  # Sdm
+            results = self._load_augs(results)
         return results
 
     def __repr__(self):
@@ -426,14 +426,14 @@ class LoadAnnotations:
         repr_str += f'with_label={self.with_label}, '
         repr_str += f'with_mask={self.with_mask}, '
         repr_str += f'with_seg={self.with_seg}, '
-        # repr_str += f'with_aug={self.with_aug}, '  # Sdm
+        repr_str += f'with_aug={self.with_aug}, '  # Sdm
         repr_str += f'poly2mask={self.poly2mask}, '
         repr_str += f'poly2mask={self.file_client_args})'
         return repr_str
 
 
 @PIPELINES.register_module()
-class LoadPanopticAnnotations(LoadAnnotations):
+class MYLoadPanopticAnnotations(MYLoadAnnotations):
     """Load multiple types of panoptic annotations.
 
     Args:
@@ -462,7 +462,7 @@ class LoadPanopticAnnotations(LoadAnnotations):
                 'pip install git+https://github.com/cocodataset/'
                 'panopticapi.git.')
 
-        super(LoadPanopticAnnotations, self).__init__(
+        super(MYLoadPanopticAnnotations, self).__init__(
             with_bbox=with_bbox,
             with_label=with_label,
             with_mask=with_mask,
@@ -544,7 +544,7 @@ class LoadPanopticAnnotations(LoadAnnotations):
 
 
 @PIPELINES.register_module()
-class LoadProposals:
+class MYLoadProposals:
     """Load proposal pipeline.
 
     Required key is "proposals". Updated keys are "proposals", "bbox_fields".
@@ -589,7 +589,7 @@ class LoadProposals:
 
 
 @PIPELINES.register_module()
-class FilterAnnotations:
+class MYFilterAnnotations:
     """Filter invalid annotations.
 
     Args:

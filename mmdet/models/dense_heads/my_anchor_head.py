@@ -9,12 +9,12 @@ from mmdet.core import (anchor_inside_flags, build_assigner, build_bbox_coder,
                         build_prior_generator, build_sampler, images_to_levels,
                         multi_apply, unmap)
 from ..builder import HEADS, build_loss
-from .base_dense_head import BaseDenseHead
+from .my_dense_head import MYBaseDenseHead
 from .dense_test_mixins import BBoxTestMixin
 
 
 @HEADS.register_module()
-class AnchorHead(BaseDenseHead, BBoxTestMixin):
+class MYAnchorHead(MYBaseDenseHead, BBoxTestMixin):
     """Anchor-based head (RPN, RetinaNet, SSD, etc.).
 
     Args:
@@ -60,7 +60,7 @@ class AnchorHead(BaseDenseHead, BBoxTestMixin):
                  train_cfg=None,
                  test_cfg=None,
                  init_cfg=dict(type='Normal', layer='Conv2d', std=0.01)):
-        super(AnchorHead, self).__init__(init_cfg)
+        super(MYAnchorHead, self).__init__(init_cfg)
         self.in_channels = in_channels
         self.num_classes = num_classes
         self.feat_channels = feat_channels
@@ -205,7 +205,7 @@ class AnchorHead(BaseDenseHead, BBoxTestMixin):
                             gt_bboxes_ignore,
                             gt_labels,
                             img_meta,
-                            # aug_labels=None,
+                            aug_labels=None,
                             label_channels=1,
                             unmap_outputs=True):
         """Compute regression and classification targets for anchors in a
@@ -244,22 +244,26 @@ class AnchorHead(BaseDenseHead, BBoxTestMixin):
             return (None, ) * 7
         # assign gt and sample anchors
         anchors = flat_anchors[inside_flags, :]
+        
 
         assign_result = self.assigner.assign(  # 修改assigner，根据每个bboxassign的gt，如果gt是label，标记
             anchors, gt_bboxes, gt_bboxes_ignore,
             None if self.sampling else gt_labels)
         sampling_result = self.sampler.sample(assign_result, anchors,
                                               gt_bboxes)
+        # print(gt_bboxes, sampling_result.pos_gt_bboxes)
+        # neg_bboxes, neg_inds, num_gts, pos_assigned_gt_inds, pos_bboxes, pos_inds, pos_is_gt
 
         num_valid_anchors = anchors.shape[0]
         bbox_targets = torch.zeros_like(anchors)
+        gt_bbox_targets = torch.zeros_like(anchors)
         bbox_weights = torch.zeros_like(anchors)
+        bbox_aug_labels = anchors.new_zeros(num_valid_anchors, dtype=torch.int8)
         labels = anchors.new_full((num_valid_anchors, ),
                                   self.num_classes,
                                   dtype=torch.long)
         label_weights = anchors.new_zeros(num_valid_anchors, dtype=torch.float)
 
-        # print()
 
         pos_inds = sampling_result.pos_inds
         neg_inds = sampling_result.neg_inds
@@ -269,8 +273,17 @@ class AnchorHead(BaseDenseHead, BBoxTestMixin):
                     sampling_result.pos_bboxes, sampling_result.pos_gt_bboxes)
             else:
                 pos_bbox_targets = sampling_result.pos_gt_bboxes
+            gt_bbox_targets[pos_inds, :] = sampling_result.pos_gt_bboxes
             bbox_targets[pos_inds, :] = pos_bbox_targets
             bbox_weights[pos_inds, :] = 1.0
+
+            # compute which bbox's gt is augged, label
+            aug_idx = torch.flatten(torch.nonzero(aug_labels))
+            if len(aug_idx) != 0:
+                for idx in iter(aug_idx):
+                    pos = torch.where(sampling_result.pos_assigned_gt_inds==idx)[0]
+                    bbox_aug_labels[sampling_result.pos_inds[pos]] = 1             
+
             if gt_labels is None:
                 # Only rpn gives gt_labels as None
                 # Foreground is the first class since v2.5.0
@@ -282,6 +295,7 @@ class AnchorHead(BaseDenseHead, BBoxTestMixin):
                 label_weights[pos_inds] = 1.0
             else:
                 label_weights[pos_inds] = self.train_cfg.pos_weight
+        # print(gt_bbox_targets[pos_inds, :])
         if len(neg_inds) > 0:
             label_weights[neg_inds] = 1.0
 
@@ -294,17 +308,19 @@ class AnchorHead(BaseDenseHead, BBoxTestMixin):
             label_weights = unmap(label_weights, num_total_anchors,
                                   inside_flags)
             bbox_targets = unmap(bbox_targets, num_total_anchors, inside_flags)
+            gt_bbox_targets = unmap(gt_bbox_targets, num_total_anchors, inside_flags)
             bbox_weights = unmap(bbox_weights, num_total_anchors, inside_flags)
+            bbox_aug_labels = unmap(bbox_aug_labels, num_total_anchors, inside_flags)
 
         return (labels, label_weights, bbox_targets, bbox_weights, pos_inds,
-                neg_inds, sampling_result)
+                neg_inds, sampling_result, bbox_aug_labels, gt_bbox_targets)
 
     def get_targets(self,
                     anchor_list,
                     valid_flag_list,
                     gt_bboxes_list,
                     img_metas,
-                    # aug_labels=None,
+                    aug_labels=None,
                     gt_bboxes_ignore_list=None,
                     gt_labels_list=None,
                     label_channels=1,
@@ -349,7 +365,6 @@ class AnchorHead(BaseDenseHead, BBoxTestMixin):
                 to properties at each feature map (i.e. having HxW dimension).
                 The results will be concatenated after the end
         """
-        # print(gt_bboxes_list, aug_labels)
         num_imgs = len(img_metas)
         assert len(anchor_list) == len(valid_flag_list) == num_imgs
 
@@ -377,11 +392,12 @@ class AnchorHead(BaseDenseHead, BBoxTestMixin):
             gt_bboxes_ignore_list,
             gt_labels_list,
             img_metas,
+            aug_labels,
             label_channels=label_channels,
             unmap_outputs=unmap_outputs)
         (all_labels, all_label_weights, all_bbox_targets, all_bbox_weights,
-         pos_inds_list, neg_inds_list, sampling_results_list) = results[:7]
-        rest_results = list(results[7:])  # user-added return values
+         pos_inds_list, neg_inds_list, sampling_results_list, all_bbox_aug_labels, gt_bbox_targets) = results[:9]
+        rest_results = list(results[9:])  # user-added return values
         # no valid anchors
         if any([labels is None for labels in all_labels]):
             return None
@@ -396,8 +412,11 @@ class AnchorHead(BaseDenseHead, BBoxTestMixin):
                                              num_level_anchors)
         bbox_weights_list = images_to_levels(all_bbox_weights,
                                              num_level_anchors)
+        aug_labels_list = images_to_levels(all_bbox_aug_labels, num_level_anchors)
+        gt_bbox_targets_list = images_to_levels(gt_bbox_targets,
+                                             num_level_anchors)
         res = (labels_list, label_weights_list, bbox_targets_list,
-               bbox_weights_list, num_total_pos, num_total_neg)
+               bbox_weights_list, num_total_pos, num_total_neg, aug_labels_list, gt_bbox_targets_list)
         if return_sampling_results:
             res = res + (sampling_results_list, )
         for i, r in enumerate(rest_results):  # user-added return values
@@ -406,7 +425,7 @@ class AnchorHead(BaseDenseHead, BBoxTestMixin):
         return res + tuple(rest_results)
 
     def loss_single(self, cls_score, bbox_pred, anchors, labels, label_weights,
-                    bbox_targets, bbox_weights, num_total_samples):
+                    bbox_targets, bbox_weights, aug_labels, gt_bbox_targets, num_total_samples):
         """Compute loss of a single scale level.
 
         Args:
@@ -435,12 +454,14 @@ class AnchorHead(BaseDenseHead, BBoxTestMixin):
         # classification loss
         labels = labels.reshape(-1)
         label_weights = label_weights.reshape(-1)
+        aug_labels = aug_labels.reshape(-1)
         cls_score = cls_score.permute(0, 2, 3,
                                       1).reshape(-1, self.cls_out_channels)
         loss_cls = self.loss_cls(
             cls_score, labels, label_weights, avg_factor=num_total_samples)
         # regression loss
         bbox_targets = bbox_targets.reshape(-1, 4)
+        gt_bbox_targets = gt_bbox_targets.reshape(-1, 4)
         bbox_weights = bbox_weights.reshape(-1, 4)
         bbox_pred = bbox_pred.permute(0, 2, 3, 1).reshape(-1, 4)
         if self.reg_decoded_bbox:
@@ -453,7 +474,9 @@ class AnchorHead(BaseDenseHead, BBoxTestMixin):
         loss_bbox = self.loss_bbox(
             bbox_pred,
             bbox_targets,
-            # gt_aug_label,
+            anchors,
+            gt_bbox_targets,
+            aug_labels,
             bbox_weights,
             avg_factor=num_total_samples)
         return loss_cls, loss_bbox
@@ -465,7 +488,7 @@ class AnchorHead(BaseDenseHead, BBoxTestMixin):
              gt_bboxes,
              gt_labels,
              img_metas,
-            #  gt_aug_labels,
+             gt_aug_labels,
              gt_bboxes_ignore=None):
         """Compute losses of the head.
 
@@ -499,14 +522,14 @@ class AnchorHead(BaseDenseHead, BBoxTestMixin):
             valid_flag_list,
             gt_bboxes,
             img_metas,
-            # aug_labels=gt_aug_labels,
+            aug_labels=gt_aug_labels,
             gt_bboxes_ignore_list=gt_bboxes_ignore,
             gt_labels_list=gt_labels,
             label_channels=label_channels)
         if cls_reg_targets is None:
             return None
         (labels_list, label_weights_list, bbox_targets_list, bbox_weights_list,
-         num_total_pos, num_total_neg) = cls_reg_targets
+         num_total_pos, num_total_neg, aug_labels_list, gt_bbox_targets_list) = cls_reg_targets
         num_total_samples = (
             num_total_pos + num_total_neg if self.sampling else num_total_pos)
 
@@ -528,7 +551,8 @@ class AnchorHead(BaseDenseHead, BBoxTestMixin):
             label_weights_list,
             bbox_targets_list,
             bbox_weights_list,
-            # gt_aug_labels,
+            aug_labels_list,
+            gt_bbox_targets_list,
             num_total_samples=num_total_samples)
         return dict(loss_cls=losses_cls, loss_bbox=losses_bbox)
 

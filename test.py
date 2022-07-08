@@ -1,4 +1,6 @@
 import os
+
+import torch
 from mmdet.apis import init_detector, inference_detector
 import mmcv
 import json
@@ -125,8 +127,22 @@ def fiftyone_visual(dataset_dir, labels_path=None):
     session.wait()
 
 
-data = '/home/dmsheng/demo/try/mmdetection/data/coco_center_aug_all/train2017/' # /home/dmsheng/demo/try/glide-text2im/experiments/center/train2017  /home/dmsheng/demo/try/glide-text2im/experiments/coco/train2017; /home/dmsheng/demo/obj_detection/PGNet/result
-annFile = '/home/dmsheng/demo/try/mmdetection/data/coco_center_aug_all/annotations/instances_train2017.json'# '/home/dmsheng/demo/try/mmdetection/data/coco_5_aug_refine/annotations/instances_train2017.json' 
-fiftyone_visual(data, annFile)
+data = '/home/dmsheng/demo/try/glide-text2im/OUTPUT/test/type_8/train2017/' # /home/dmsheng/demo/try/glide-text2im/experiments/center/train2017  /home/dmsheng/demo/try/glide-text2im/experiments/coco/train2017; /home/dmsheng/demo/obj_detection/PGNet/result
+annFile = '/home/dmsheng/demo/try/glide-text2im/OUTPUT/test/type_8/annotations/instances_train2017.json'# '/home/dmsheng/demo/try/mmdetection/data/coco_5_aug_refine/annotations/instances_train2017.json' 
+# annFile = None
+fiftyone_visual(data, annFile) # 
 
 # test()
+
+# a = torch.tensor([0, 1, 1, 0])
+# b = torch.tensor([0, 3, 2, 1, 1, 1])
+# c = torch.tensor([6,7,8,9,10,5])
+# print(a, b)
+# idxs = torch.flatten(torch.nonzero(a))
+# aug_labels = torch.zeros(11)
+# for idx in iter(idxs):
+#     # print(torch.where(b==idx)[0])
+#     pos = torch.where(b==idx)[0]
+#     print(pos, c[pos])
+#     aug_labels[c[pos]] = 1
+# print(aug_labels)

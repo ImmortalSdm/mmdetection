@@ -9,14 +9,14 @@ from mmcv.runner import BaseModule, force_fp32
 from mmdet.core.utils import filter_scores_and_topk, select_single_mlvl
 
 
-class BaseDenseHead(BaseModule, metaclass=ABCMeta):
+class MYBaseDenseHead(BaseModule, metaclass=ABCMeta):
     """Base class for DenseHeads."""
 
     def __init__(self, init_cfg=None):
-        super(BaseDenseHead, self).__init__(init_cfg)
+        super(MYBaseDenseHead, self).__init__(init_cfg)
 
     def init_weights(self):
-        super(BaseDenseHead, self).init_weights()
+        super(MYBaseDenseHead, self).init_weights()
         # avoid init_cfg overwrite the initialization of `conv_offset`
         for m in self.modules():
             # DeformConv2dPack, ModulatedDeformConv2dPack
@@ -329,11 +329,11 @@ class BaseDenseHead(BaseModule, metaclass=ABCMeta):
         """
         outs = self(x)
 
-        # aug_labels = kwargs['aug_labels'] # Sdm
+        aug_labels = kwargs['aug_labels'] # Sdm
         # import pdb; pdb.set_trace()
 
         if gt_labels is None:
-            loss_inputs = outs + (gt_bboxes, img_metas) # Sdm , aug_labels
+            loss_inputs = outs + (gt_bboxes, img_metas, aug_labels) # Sdm 
         else:
             loss_inputs = outs + (gt_bboxes, gt_labels, img_metas)
         losses = self.loss(*loss_inputs, gt_bboxes_ignore=gt_bboxes_ignore)

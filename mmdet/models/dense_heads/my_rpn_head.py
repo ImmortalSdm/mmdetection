@@ -9,10 +9,11 @@ from mmcv.ops import batched_nms
 
 from ..builder import HEADS
 from .anchor_head import AnchorHead
+from .my_anchor_head import MYAnchorHead
 
 
 @HEADS.register_module()
-class RPNHead(AnchorHead):
+class MYRPNHead(MYAnchorHead):
     """RPN head.
 
     Args:
@@ -27,7 +28,7 @@ class RPNHead(AnchorHead):
                  num_convs=1,
                  **kwargs):
         self.num_convs = num_convs
-        super(RPNHead, self).__init__(
+        super(MYRPNHead, self).__init__(
             1, in_channels, init_cfg=init_cfg, **kwargs)
 
     def _init_layers(self):
@@ -72,7 +73,7 @@ class RPNHead(AnchorHead):
              bbox_preds,
              gt_bboxes,
              img_metas,
-            #  aug_labels=None,
+             aug_labels=None,
              gt_bboxes_ignore=None):
         """Compute losses of the head.
 
@@ -91,13 +92,13 @@ class RPNHead(AnchorHead):
         Returns:
             dict[str, Tensor]: A dictionary of loss components.
         """
-        losses = super(RPNHead, self).loss(
+        losses = super(MYRPNHead, self).loss(
             cls_scores,
             bbox_preds,
             gt_bboxes,
             None,
             img_metas,
-            # aug_labels,
+            aug_labels,
             gt_bboxes_ignore=gt_bboxes_ignore)
         return dict(
             loss_rpn_cls=losses['loss_cls'], loss_rpn_bbox=losses['loss_bbox'])
@@ -250,7 +251,7 @@ class RPNHead(AnchorHead):
 
         assert len(cls_scores) == len(bbox_preds)
 
-        batch_bboxes, batch_scores = super(RPNHead, self).onnx_export(
+        batch_bboxes, batch_scores = super(MYRPNHead, self).onnx_export(
             cls_scores, bbox_preds, img_metas=img_metas, with_nms=False)
         # Use ONNX::NonMaxSuppression in deployment
         from mmdet.core.export import add_dummy_nms_for_onnx

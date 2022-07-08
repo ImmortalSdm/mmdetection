@@ -1,5 +1,9 @@
-_base_ = 'deformable_detr_refine_r50_16x2_50e_coco.py'
-model = dict(bbox_head=dict(as_two_stage=True))
+_base_ = [
+    '../_base_/models/faster_rcnn_r50_fpn.py',
+    '../_base_/datasets/coco_detection.py',
+    '../_base_/schedules/schedule_2x.py', '../_base_/default_runtime.py'
+]
+
 
 dataset_type = 'CocoDataset'
 classes = ('person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train',

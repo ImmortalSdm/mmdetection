@@ -43,6 +43,7 @@ class DeployBaseDetector(BaseDetector):
 
     def forward(self, img, img_metas, return_loss=True, **kwargs):
         outputs = self.forward_test(img, img_metas, **kwargs)
+        # print(outputs)
         batch_dets, batch_labels = outputs[:2]
         batch_masks = outputs[2] if len(outputs) == 3 else None
         batch_size = img[0].shape[0]

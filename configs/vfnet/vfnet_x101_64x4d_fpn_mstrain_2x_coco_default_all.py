@@ -35,17 +35,17 @@ data = dict(
         type=dataset_type,
         # 将类别名字添加至 `classes` 字段中
         classes=classes,
-        ann_file='DATASET/coco/annotations/instances_train2017.json',
-        img_prefix='DATASET/coco/train2017/'),
+        ann_file='/home/dmsheng/demo/try/mmdetection/data/coco_default_all/annotations/instances_train2017.json',
+        img_prefix='/home/dmsheng/demo/try/mmdetection/data/coco_default_all/train2017/'),
     val=dict(
         type=dataset_type,
         # 将类别名字添加至 `classes` 字段中
         classes=classes,
-        ann_file='DATASET/coco/annotations/instances_val2017.json',
-        img_prefix='DATASET/coco/val2017/'),
+        ann_file='/home/dmsheng/demo/try/mmdetection/data/coco_default_all/annotations/instances_val2017.json',
+        img_prefix='/home/dmsheng/demo/try/mmdetection/data/coco_default_all/val2017/'),
     test=dict(
         type=dataset_type,
         # 将类别名字添加至 `classes` 字段中
         classes=classes,
-        ann_file='DATASET/coco/annotations/instances_val2017.json',
-        img_prefix='DATASET/coco/val2017/'))
+        ann_file='/home/dmsheng/demo/try/mmdetection/data/coco_default_all/annotations/instances_val2017.json',
+        img_prefix='/home/dmsheng/demo/try/mmdetection/data/coco_default_all/val2017/'))
