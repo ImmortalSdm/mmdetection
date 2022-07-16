@@ -130,5 +130,9 @@ data/
 checkpoints/
 experiments/
 work_dirs/
+docker/
+docs/
+demo/
+tests/
 coco.json
 instances_train2017.json
