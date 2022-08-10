@@ -1,3 +1,4 @@
+import argparse
 import os
 
 import torch
@@ -17,7 +18,6 @@ from matplotlib import pyplot as plt
 from glob import glob
 from tqdm import tqdm
 
-
 coco_id_name_map={1: 'person', 2: 'bicycle', 3: 'car', 4: 'motorcycle', 5: 'airplane',
                    6: 'bus', 7: 'train', 8: 'truck', 9: 'boat', 10: 'traffic light',
                    11: 'fire hydrant', 13: 'stop sign', 14: 'parking meter', 15: 'bench',
@@ -35,10 +35,6 @@ coco_id_name_map={1: 'person', 2: 'bicycle', 3: 'car', 4: 'motorcycle', 5: 'airp
                    82: 'refrigerator', 84: 'book', 85: 'clock', 86: 'vase', 87: 'scissors',
                    88: 'teddy bear', 89: 'hair drier', 90: 'toothbrush'}
 
-cocoRoot = '/home/dmsheng/demo/try/mmdetection/data/coco_5_aug_refine'
-dataType = "train2017" # ["train2017", "val2017", "test2017"]
-data_dir = os.path.join(cocoRoot, dataType)
-annFile = os.path.join(cocoRoot, f'annotations/instances_{dataType}.json')
 
 def test():
     # Specify the path to model config and checkpoint file
@@ -112,6 +108,7 @@ def fiftyone_visual(dataset_dir, labels_path=None):
 
     
     if labels_path:
+        print('Loading annotations')
         # Import the COCO dataset
         dataset = fo.Dataset.from_dir(
             data_path=dataset_dir,
@@ -126,23 +123,14 @@ def fiftyone_visual(dataset_dir, labels_path=None):
     session = fo.launch_app(dataset, remote=True)
     session.wait()
 
+if __name__ == '__main__':
 
-data = '/home/dmsheng/demo/try/glide-text2im/OUTPUT/test/type_8/train2017/' # /home/dmsheng/demo/try/glide-text2im/experiments/center/train2017  /home/dmsheng/demo/try/glide-text2im/experiments/coco/train2017; /home/dmsheng/demo/obj_detection/PGNet/result
-annFile = '/home/dmsheng/demo/try/glide-text2im/OUTPUT/test/type_8/annotations/instances_train2017.json'# '/home/dmsheng/demo/try/mmdetection/data/coco_5_aug_refine/annotations/instances_train2017.json' 
-# annFile = None
-fiftyone_visual(data, annFile) # 
+    parser = argparse.ArgumentParser(description='txt2image utils for copy, paste and fusion')
 
-# test()
+    # parser.add_argument('--cocoRoot', help='dataset')
+    # parser.add_argument('--t', type=int, help='COCO class', required=True)
+    parser.add_argument('--data', type=str, help='data path')
+    parser.add_argument('--ann', type=str, default=None, help='annotation path')
+    args = parser.parse_args()
 
-# a = torch.tensor([0, 1, 1, 0])
-# b = torch.tensor([0, 3, 2, 1, 1, 1])
-# c = torch.tensor([6,7,8,9,10,5])
-# print(a, b)
-# idxs = torch.flatten(torch.nonzero(a))
-# aug_labels = torch.zeros(11)
-# for idx in iter(idxs):
-#     # print(torch.where(b==idx)[0])
-#     pos = torch.where(b==idx)[0]
-#     print(pos, c[pos])
-#     aug_labels[c[pos]] = 1
-# print(aug_labels)
+    fiftyone_visual(args.data, args.ann)

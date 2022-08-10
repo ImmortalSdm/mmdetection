@@ -80,18 +80,26 @@ optimizer = dict(type='SGD', lr=0.1, momentum=0.9, weight_decay=0.00004)
 optimizer_config = dict(grad_clip=None)
 
 # lr steps at [0.9, 0.95, 0.975] of the maximum iterations
+# lr_config = dict(
+#     policy='step',
+#     warmup='linear',
+#     warmup_iters=1000,
+#     warmup_ratio=0.001,
+#     step=[243000, 256500, 263250])
+# checkpoint_config = dict(interval=6000)
+# runner = dict(type='IterBasedRunner', max_iters=270000)
+# The model is trained by 270k iterations with batch_size 64,
+# which is roughly equivalent to 144 epochs.
 lr_config = dict(
     policy='step',
     warmup='linear',
     warmup_iters=1000,
     warmup_ratio=0.001,
-    step=[243000, 256500, 263250])
-checkpoint_config = dict(interval=6000)
-# The model is trained by 270k iterations with batch_size 64,
-# which is roughly equivalent to 144 epochs.
-runner = dict(type='IterBasedRunner', max_iters=270000)
+    step=[69, 71])
+runner = dict(type='EpochBasedRunner', max_epochs=72)
+
 
 # NOTE: `auto_scale_lr` is for automatically scaling LR,
 # USER SHOULD NOT CHANGE ITS VALUES.
 # base_batch_size = (32 GPUs) x (2 samples per GPU)
-auto_scale_lr = dict(base_batch_size=64)
+auto_scale_lr = dict(base_batch_size=16)

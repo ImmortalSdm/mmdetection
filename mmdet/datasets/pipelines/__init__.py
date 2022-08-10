@@ -17,6 +17,7 @@ from .transforms import (Albu, CopyPaste, CutOut, Expand, MinIoURandomCrop,
                          YOLOXHSVRandomAug)
 from .my_loading import MYLoadAnnotations
 from .my_formatting import MYDefaultFormatBundle
+from .my_pipeline import Copy_Paste_Random
 
 __all__ = [
     'Compose', 'to_tensor', 'ToTensor', 'ImageToTensor', 'ToDataContainer',
@@ -29,5 +30,5 @@ __all__ = [
     'Rotate', 'ColorTransform', 'EqualizeTransform', 'BrightnessTransform',
     'ContrastTransform', 'Translate', 'RandomShift', 'Mosaic', 'MixUp',
     'RandomAffine', 'YOLOXHSVRandomAug', 'CopyPaste', 
-    'MYLoadAnnotations', 'MYDefaultFormatBundle'
+    'MYLoadAnnotations', 'MYDefaultFormatBundle', 'Copy_Paste_Random'
 ]

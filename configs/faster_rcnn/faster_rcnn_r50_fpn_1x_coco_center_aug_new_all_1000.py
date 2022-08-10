@@ -1,18 +1,8 @@
-_base_ = './vfnet_r50_fpn_mstrain_2x_coco.py'
-model = dict(
-    backbone=dict(
-        type='ResNeXt',
-        depth=101,
-        groups=64,
-        base_width=4,
-        num_stages=4,
-        out_indices=(0, 1, 2, 3),
-        frozen_stages=1,
-        norm_cfg=dict(type='BN', requires_grad=True),
-        norm_eval=True,
-        style='pytorch',
-        init_cfg=dict(
-            type='Pretrained', checkpoint='open-mmlab://resnext101_64x4d')))
+_base_ = [
+    '../_base_/models/faster_rcnn_r50_fpn.py',
+    '../_base_/datasets/coco_detection.py',
+    '../_base_/schedules/schedule_1x.py', '../_base_/default_runtime.py'
+]
 
 dataset_type = 'CocoDataset'
 classes = ('person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train',
@@ -35,17 +25,17 @@ data = dict(
         type=dataset_type,
         # 将类别名字添加至 `classes` 字段中
         classes=classes,
-        ann_file='DATASET/coco/annotations/instances_train2017.json',
-        img_prefix='DATASET/coco/train2017/'),
+        ann_file='/home/dmsheng/demo/try/mmdetection/data/coco_center_aug_new_all_1000/annotations/instances_train2017.json',
+        img_prefix='/home/dmsheng/demo/try/mmdetection/data/coco_center_aug_new_all_1000/train2017/'),
     val=dict(
         type=dataset_type,
         # 将类别名字添加至 `classes` 字段中
         classes=classes,
-        ann_file='DATASET/coco/annotations/instances_val2017.json',
-        img_prefix='DATASET/coco/val2017/'),
+        ann_file='/home/dmsheng/demo/try/mmdetection/data/coco_center_aug_new_all_1000/annotations/instances_val2017.json',
+        img_prefix='/home/dmsheng/demo/try/mmdetection/data/coco_center_aug_new_all_1000/val2017/'),
     test=dict(
         type=dataset_type,
         # 将类别名字添加至 `classes` 字段中
         classes=classes,
-        ann_file='DATASET/coco/annotations/instances_val2017.json',
-        img_prefix='DATASET/coco/val2017/'))
+        ann_file='/home/dmsheng/demo/try/mmdetection/data/coco_center_aug_new_all_1000/annotations/instances_val2017.json',
+        img_prefix='/home/dmsheng/demo/try/mmdetection/data/coco_center_aug_new_all_1000/val2017/'))
