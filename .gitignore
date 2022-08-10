@@ -134,5 +134,6 @@ docker/
 docs/
 demo/
 tests/
+curves/
 coco.json
 instances_train2017.json
